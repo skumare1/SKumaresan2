@@ -31,7 +31,7 @@ public class PatientDatabaseHelper2 extends SQLiteOpenHelper {
     }
 
     public PatientDatabaseHelper2(Context context, String tableName) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        super(new CustomDatabaseContext(context), DATABASE_NAME, null, DATABASE_VERSION);
         this.tableName = tableName;
         CREATE_TABLE = "CREATE TABLE IF NOT EXISTS "
                 + tableName + "(" + COLUMN_1 + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"

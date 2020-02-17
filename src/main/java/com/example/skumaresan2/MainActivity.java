@@ -45,12 +45,11 @@ public class MainActivity extends Activity {
     AccelerometerService mAccelerometerService;
     float[] data = new float[]{0,0,0};
     PatientDatabaseHelper2 db;
-    boolean dbHelperCreated = false;
     EditText patientId, patientAge, patientName;
     RadioGroup sex;
     String tableName="";
     Button mDownloadButton, mUploadButton, mStopButton;
-    int databaseVersion = 1;
+
 
 
     @Override
@@ -69,10 +68,16 @@ public class MainActivity extends Activity {
             for (String str : permissions) {
                 if (checkSelfPermission(str) != PackageManager.PERMISSION_GRANTED) {
                    requestPermissions(permissions, REQUEST_CODE_PERMISSION_STORAGE);
-                    //return;
                 }
             }
         }
+
+        //Create download directory
+        File sdcard = Environment.getExternalStorageDirectory();
+        String dbFileString = sdcard.getAbsolutePath() + File.separator+ "Android" + File.separator+ "Data" + File.separator + "CSE535_ASSIGNMENT2_DOWN" + File.separator;
+
+        File downloadDirectory = new File(dbFileString);
+        downloadDirectory.mkdirs();
 
         //Start a bound service to receive accelerometer data
         Intent intent = new Intent (this, AccelerometerService.class);
@@ -175,8 +180,9 @@ public class MainActivity extends Activity {
         if (!patientId.getText().toString().trim().equals("") && !patientAge.getText().toString().equals("")){
             int pId = Integer.parseInt(patientId.getText().toString());
             int pAge = Integer.parseInt(patientAge.getText().toString());
-            String pName = patientName.getText().toString().trim();
-            pName.trim();
+            String pName;
+            pName = patientName.getText().toString().trim();
+            pName = pName.trim();
 
             if (pId>-1 && pAge >0 && pAge<150 && !pName.equals("")){ //Patient data validations
                 String pSex;
@@ -191,18 +197,6 @@ public class MainActivity extends Activity {
                 if (!constructedTableName.equals(tableName)) {
                     tableName = constructedTableName;
                     Log.d("Main", "Creating table " + tableName);
-
-//                    PatientDownloadedDatabaseHelper p = new PatientDownloadedDatabaseHelper(getApplicationContext(), tableName, "SKumaresan2Downloaded.db");
-//                    if (!dbHelperCreated){
-//                        Log.d("Database", "New db helper");
-//                        db = new PatientDatabaseHelper(getApplicationContext(), tableName, p.getDatabaseVersion()); //Create database with constructed table name
-//                    }else {
-//                        Log.d("Database", "Reusing db helper");
-//                        db.onUpgrade(db.getDatabase(), db.getDatabaseVersion(), db.getDatabaseVersion() + 1);
-//                    }
-                    //db.onUpgrade(db.getDatabase(), db.getDatabaseVersion(), p.getDatabaseVersion() + 1);
-
-                    //databaseVersion++;
 
                     db = new PatientDatabaseHelper2(getApplicationContext(), tableName);
                     db.createTable();
@@ -287,28 +281,16 @@ public class MainActivity extends Activity {
             values1[i]= values1[i+1];
         values1[9]=data[0];
         graph1.setValues(values1); //Update the values to be plotted in the GraphView view.
-//        String s="";
-//        for (int i =0;i<10;i++)
-//            s+= Float.toString(values1[i])+",";
-//        Log.d("Values1",s);
 
         for (int i=0;i<9;i++)
             values2[i]= values2[i+1];
         values2[9]=data[1];
         graph2.setValues(values2); //Update the values to be plotted in the GraphView view.
-//        s="";
-//        for (int i =0;i<10;i++)
-//            s+= Float.toString(values2[i])+",";
-//        Log.d("Values2",s);
 
         for (int i=0;i<9;i++)
             values3[i]= values3[i+1];
         values3[9]=data[2];
         graph3.setValues(values3); //Update the values to be plotted in the GraphView view.
-//        s="";
-//        for (int i =0;i<10;i++)
-//            s+= Float.toString(values3[i])+",";
-//        Log.d("Values3",s);
     }
 
     //Keep shifting the x-axis labels of the graph1 to the left, to simulate animation, as the time progresses
@@ -327,11 +309,26 @@ public class MainActivity extends Activity {
 
         File dbFile = new File(currentDBPath);
         Uri fileUri = Uri.fromFile(dbFile);
+
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
 
         UploadFilesFlask uff = new UploadFilesFlask(MainActivity.this);
-        uff.sendFileToLocalServer(currentDBPath, "application");
+        //uff.sendFileToLocalServer(currentDBPath, "application");
+
+        //Custom DB code
+        File sdcard = Environment.getExternalStorageDirectory();
+        String dbfileString = sdcard.getAbsolutePath() + File.separator+ "Android" + File.separator+ "Data" + File.separator + "CSE535_ASSIGNMENT2" + File.separator + db.getDatabaseName();
+        if (!dbfileString.endsWith(".db")) {
+            dbfileString += ".db" ;
+        }
+        File result = new File(dbfileString);
+        //End of Custom DB code
+
+        uff.sendFileToLocalServer(dbfileString, "application");
+
+
+
 
         //mUploadButton.setEnabled(false); //Disable upload button until upload is complete
         //TODO: Fix this... it is called too early
@@ -354,9 +351,16 @@ public class MainActivity extends Activity {
             Uri fileUri = Uri.fromFile(dbFile);
             StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
             StrictMode.setVmPolicy(builder.build());
-
             final UploadFilesFlask uff = new UploadFilesFlask(MainActivity.this);
-            uff.getFileFromServer(currentDBPath, "application");
+//          uff.getFileFromServer(currentDBPath, "application");
+
+            //Custom DB code
+            File sdcard = Environment.getExternalStorageDirectory();
+            String dbfileString = sdcard.getAbsolutePath() + File.separator+ "Android" + File.separator+ "Data" + File.separator + "CSE535_ASSIGNMENT2_DOWN" + File.separator + "SKumaresan2.db";
+            //End of Custom DB code
+
+            uff.getFileFromServer(dbfileString, "application");
+
             //Thread.sleep(2000);
 
             //Ensure that the download is complete, before trying to access the database.
@@ -371,7 +375,7 @@ public class MainActivity extends Activity {
                             //Check if the database has been copied over from server
                             if (uff.getDownloadStatus()) {
 
-                                PatientDownloadedDatabaseHelper pddh = new PatientDownloadedDatabaseHelper(getApplicationContext(), tableName, "SKumaresan2Downloaded.db");
+                                PatientDownloadedDatabaseHelper pddh = new PatientDownloadedDatabaseHelper(getApplicationContext(), tableName);
                                 float[][] data;
                                 data = pddh.fetchLastTenRows();
                                 for (int i = 0; i < data[0].length; i++) {
@@ -407,7 +411,7 @@ public class MainActivity extends Activity {
                     }); //Runnable ends
                 }
             };
-            timer2.schedule(timerTask2, 0, 400);//Setup timer to trigger every 0.2 seconds
+            timer2.schedule(timerTask2, 0, 400);//Setup timer to trigger every 0.4 seconds
         }else{
             Log.d("Download", "Timer 2 NOT being started again since it is already running.");
         }

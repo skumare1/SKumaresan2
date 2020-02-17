@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 public class PatientDownloadedDatabaseHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
-    private static final String DOWNLOADED_DATABASE_NAME = "SKumaresan2Downloaded.db";
+    private static final String DOWNLOADED_DATABASE_NAME = "SKumaresan2.db";
     private String tableName=null;
     private SQLiteDatabase db;
     private static final String COLUMN_2 = "x";
@@ -25,8 +25,8 @@ public class PatientDownloadedDatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    public PatientDownloadedDatabaseHelper(Context context, String tableName, String databaseName) {
-        super(context, databaseName, null, DATABASE_VERSION);
+    public PatientDownloadedDatabaseHelper(Context context, String tableName) {
+        super(new CustomDatabaseContext2(context), DOWNLOADED_DATABASE_NAME, null, DATABASE_VERSION);
         this.tableName = tableName;
     }
 
