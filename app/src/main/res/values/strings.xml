@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">SKumaresan2</string>
+    <string name="button_label_run">RUN</string>
+    <string name="button_label_stop">STOP</string>
+    <string name="sexFemale">Female</string>
+    <string name="sexMale">Male</string>
+    <string name="upload_db">Upload DB</string>
+    <string name="download_db">Download DB</string>
+    <string name="store">Store</string>
+    <string name="save_patient">Save Patient</string>
+
+</resources>
