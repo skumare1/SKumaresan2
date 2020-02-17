@@ -33,13 +33,7 @@ public class PatientDatabaseHelper extends SQLiteOpenHelper {
 
     public PatientDatabaseHelper(Context context, String tableName, int databaseVersion) {
         super(context, DATABASE_NAME, null, databaseVersion);
-        //super(context, Environment.getExternalStorageDirectory().getPath()
-//        super(context, File.separator + "sdcard"
-//                + File.separator + "Android"+ File.separator + "data" + File.separator + "CSE535_ASSIGNMENT2"
-//                + File.separator + DATABASE_NAME, null, DATABASE_VERSION);
-
         this.tableName = tableName;
-
 
         CREATE_TABLE = "CREATE TABLE IF NOT EXISTS "
                 + tableName + "(" + COLUMN_1 + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"

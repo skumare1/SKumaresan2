@@ -304,36 +304,22 @@ public class MainActivity extends Activity {
 
     Timer timer3=null;
     public void uploadClicked(View view) {
-
-        String currentDBPath = "/data/data/" + getApplicationContext().getPackageName() + "/databases/"+db.getDatabaseName();
-
-        File dbFile = new File(currentDBPath);
-        Uri fileUri = Uri.fromFile(dbFile);
-
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
 
         UploadFilesFlask uff = new UploadFilesFlask(MainActivity.this);
-        //uff.sendFileToLocalServer(currentDBPath, "application");
 
-        //Custom DB code
+        //Custom DB path
         File sdcard = Environment.getExternalStorageDirectory();
         String dbfileString = sdcard.getAbsolutePath() + File.separator+ "Android" + File.separator+ "Data" + File.separator + "CSE535_ASSIGNMENT2" + File.separator + db.getDatabaseName();
         if (!dbfileString.endsWith(".db")) {
             dbfileString += ".db" ;
         }
         File result = new File(dbfileString);
-        //End of Custom DB code
 
         uff.sendFileToLocalServer(dbfileString, "application");
 
-
-
-
-        //mUploadButton.setEnabled(false); //Disable upload button until upload is complete
-        //TODO: Fix this... it is called too early
-        //if (uff.getUploadStatus()) //If upload was successful, enable Download button
-           mDownloadButton.setEnabled(true);
+        mDownloadButton.setEnabled(true);
     }
 
     Timer timer2=null;
@@ -346,22 +332,17 @@ public class MainActivity extends Activity {
             timer2Success=false;
             mDownloadButton.setEnabled(false);//Disable download button until the download completes
 
-            String currentDBPath = "/data/data/" + getApplicationContext().getPackageName() + "/databases/" + "SKumaresan2Downloaded.db";
-            File dbFile = new File(currentDBPath);
-            Uri fileUri = Uri.fromFile(dbFile);
             StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
             StrictMode.setVmPolicy(builder.build());
             final UploadFilesFlask uff = new UploadFilesFlask(MainActivity.this);
-//          uff.getFileFromServer(currentDBPath, "application");
 
-            //Custom DB code
+
+            //Custom DB path
             File sdcard = Environment.getExternalStorageDirectory();
             String dbfileString = sdcard.getAbsolutePath() + File.separator+ "Android" + File.separator+ "Data" + File.separator + "CSE535_ASSIGNMENT2_DOWN" + File.separator + "SKumaresan2.db";
             //End of Custom DB code
 
             uff.getFileFromServer(dbfileString, "application");
-
-            //Thread.sleep(2000);
 
             //Ensure that the download is complete, before trying to access the database.
             //To do so, start a timer that checks if the download is complete, every 0.2 seconds
@@ -393,8 +374,7 @@ public class MainActivity extends Activity {
                                         }
                                     }
                                 }
-                                //stopClicked(graph1);
-                                //stopTimer();
+
                                 graph1.setValues(values1);
                                 graph2.setValues(values2);
                                 graph3.setValues(values3);

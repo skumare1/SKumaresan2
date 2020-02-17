@@ -49,7 +49,6 @@ public class UploadFilesFlask {
 
         try {
             String filenameWithoutPath = filename.substring(filename.lastIndexOf("/")+1);
-            //Toast.makeText(parentActity.getBaseContext(),"Prepare sending " + filename + " to server...", Toast.LENGTH_SHORT).show();
             Log.i("Upload","Prepare sending " + filename + " to server..."+ targetUploadServiceURL);
 
             FileInputStream fileInputStream = new FileInputStream(new File(filename));
@@ -115,7 +114,6 @@ public class UploadFilesFlask {
                             Toast.makeText(parentActity.getBaseContext(), bodyString, Toast.LENGTH_SHORT).show();
                             Log.i("Upload", bodyString);
                             uploadComplete=true;
-                            //response.body().close();
                         } catch ( Exception e) {
                             // Don't know
                             e.printStackTrace();
@@ -138,7 +136,6 @@ public class UploadFilesFlask {
         final String file = filename;
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder().url(targetUploadServiceURL).build();
-        //Response response = getClient().newCall(request).execute();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -186,12 +183,8 @@ public class UploadFilesFlask {
                     parentActity.runOnUiThread(new Runnable() {
                         public void run() {
                             try {
-                                //String bodyString = response.body().string();
-                                //Toast.makeText(parentActity.getBaseContext(), "Download Successful! " + bodyString, Toast.LENGTH_LONG).show();
-                                //Log.i("Download", bodyString);
                                 Toast.makeText(parentActity.getBaseContext(), "Download Successful! ", Toast.LENGTH_LONG).show();
 
-                                //response.body().close();
                             } catch ( Exception e) {
                                 // Don't know
                                 e.printStackTrace();
@@ -204,7 +197,7 @@ public class UploadFilesFlask {
                 }
                 catch (IOException e) {
                     Log.d("Download",e.toString());
-                    //parentActity.disableDownloadButton();
+
                     parentActity.runOnUiThread(new Runnable() {
                         public void run() {
                             try {
@@ -233,17 +226,6 @@ public class UploadFilesFlask {
                     });
 
                 }
-
-
-//                try {
-//                    //Wait for 4 seconds (to ensure MainActivity realizes that the DB download has completed successfully
-//                    Thread.sleep(2000);
-//                    //Stop the timer in MainActivity that keeps polling to check if download was completed successfully
-//                    parentActity.stopTimer2();
-//                    parentActity.timer2 = null;
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
             }
         });
     }
@@ -260,67 +242,4 @@ public class UploadFilesFlask {
         downloadComplete = status;
     }
 
-//    void getFileFromServer2(String filename, String mediaType){
-//        getFileFromServer2(filename, this.downloadServiceURL, mediaType);
-//    }
-//
-//    void getFileFromServer2(String filename, String targetUploadServiceURL, String mediaType){
-//        final String file = filename;
-//        OkHttpClient client = new OkHttpClient();
-//        Request request = new Request.Builder().url(targetUploadServiceURL).build();
-//        //Response response = getClient().newCall(request).execute();
-//
-//        Call call = client.newCall(request);
-//        try {
-//            final Response response = call.execute();
-//            InputStream is = response.body().byteStream();
-//
-//            BufferedInputStream input = new BufferedInputStream(is);
-//            OutputStream output = new FileOutputStream(file);
-//
-//            byte[] data = new byte[1024];
-//            long total = 0; int count;
-//
-//            while ((count = input.read(data)) != -1) {
-//                Log.d("Downloading","Reading inputStream: "+count+" bytes.");
-//                total += count;
-//                output.write(data, 0, count);
-//            }
-//            output.flush();
-//            output.close();
-//            input.close();
-//
-//            parentActity.runOnUiThread(new Runnable() {
-//                public void run() {
-//                    try {
-//                        String bodyString = response.body().string();
-//                        Toast.makeText(parentActity.getBaseContext(), "Download Successful! " + bodyString, Toast.LENGTH_LONG).show();
-//                        Log.i("Download", bodyString);
-//
-//                        //response.body().close();
-//                    } catch ( Exception e) {
-//                        // Don't know
-//                        e.printStackTrace();
-//                    }
-//                }
-//            });
-//
-//        } catch (final IOException e) {
-//            e.printStackTrace();
-//            // Cancel the post on failure.
-//            call.cancel();
-//            //e.printStackTrace();
-//            parentActity.runOnUiThread(new Runnable() {
-//                public void run() {
-//                    String errString = e.getMessage();
-//                    Toast.makeText(parentActity.getBaseContext(),"Connection Error wile downloading: " + errString, Toast.LENGTH_LONG).show();
-//                    Log.e("Download", errString);
-//                }
-//            });
-//        }
-//
-//
-//
-//
-//    }
 }
