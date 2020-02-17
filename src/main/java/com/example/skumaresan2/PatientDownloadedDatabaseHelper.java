@@ -24,9 +24,6 @@ public class PatientDownloadedDatabaseHelper extends SQLiteOpenHelper {
         this.tableName = tableName;
     }
 
-    public PatientDownloadedDatabaseHelper(Context context) {
-        super(context, DOWNLOADED_DATABASE_NAME, null, DATABASE_VERSION);
-    }
 
     public PatientDownloadedDatabaseHelper(Context context, String tableName, String databaseName) {
         super(context, databaseName, null, DATABASE_VERSION);
