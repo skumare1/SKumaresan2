@@ -12,9 +12,9 @@ import java.io.File;
 
 public class PatientDatabaseHelper extends SQLiteOpenHelper {
 
-    private static final String DATABASE_NAME = "SKumaresan2.db";
+    private static final String DATABASE_NAME = "SKumaresan2.patientDatabaseHelper2";
     private static final int DATABASE_VERSION = 1;
-    private static final String DOWNLOADED_DATABASE_NAME = "SKumaresan2Downloaded.db";
+    private static final String DOWNLOADED_DATABASE_NAME = "SKumaresan2Downloaded.patientDatabaseHelper2";
     private String tableName=null;
     private static final String COLUMN_1 = "timestamp";
     private static final String COLUMN_2 = "x";

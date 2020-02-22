@@ -25,8 +25,11 @@ import okhttp3.Response;
 
 public class UploadFilesFlask {
 
-    final String uploadServiceURL = "http://192.168.0.198:5000/upload";
-    final String downloadServiceURL = "http://192.168.0.198:5000/return-files";
+//    final String uploadServiceURL = "http://192.168.0.198:5000/upload";
+//    final String downloadServiceURL = "http://192.168.0.198:5000/return-files";
+    final String uploadServiceURL = "http://172.18.218.188:5000/upload";
+    final String downloadServiceURL = "http://172.18.218.188:5000/return-files";
+
 
     MainActivity parentActity;
     private boolean downloadComplete = false;
@@ -125,12 +128,16 @@ public class UploadFilesFlask {
         });
     }
 
-
-    void getFileFromServer(String filename, String mediaType){
+     void getFileFromServer(String filename, String mediaType){
         getFileFromServer(filename, this.downloadServiceURL, mediaType);
     }
 
     void getFileFromServer(String filename, String targetUploadServiceURL, String mediaType){
+        parentActity.runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(parentActity.getBaseContext(),"Sending download request...", Toast.LENGTH_SHORT).show();
+            }
+        });
         downloadComplete = false; //Flag to indicate if download has been completed.
 
         final String file = filename;
@@ -144,12 +151,11 @@ public class UploadFilesFlask {
                 // Cancel the post on failure.
                 call.cancel();
                 //Stop the timer in MainActivity that keeps polling to check if download was completed successfully
-                parentActity.stopTimer2();
-                parentActity.timer2 = null;
-                parentActity.enableDownloadButton();
-                //e.printStackTrace();
                 parentActity.runOnUiThread(new Runnable() {
                     public void run() {
+                        parentActity.stopTimer2();
+                        parentActity.timer2 = null;
+                        parentActity.enableDownloadButton();
                         String errString = e.getMessage();
                         Toast.makeText(parentActity.getBaseContext(),"Connection Error wile downloading: " + errString, Toast.LENGTH_LONG).show();
                         Log.e("Download", errString);

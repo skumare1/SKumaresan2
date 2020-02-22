@@ -6,7 +6,6 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -16,16 +15,12 @@ import android.util.Log;
 import android.view.View;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Timer;
 import java.util.TimerTask;
 import android.os.Handler;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
@@ -44,7 +39,7 @@ public class MainActivity extends Activity {
     String[] horlabels; //Labels on the x-axis of the graph1
     AccelerometerService mAccelerometerService;
     float[] data = new float[]{0,0,0};
-    PatientDatabaseHelper2 db;
+    PatientDatabaseHelper2 patientDatabaseHelper2;
     EditText patientId, patientAge, patientName;
     RadioGroup sex;
     String tableName="";
@@ -97,7 +92,7 @@ public class MainActivity extends Activity {
         sex = findViewById(R.id.radioSex);
 
         mUploadButton.setEnabled(false); //Keep the upload button disabled until some value is plotted on the graph.
-        mDownloadButton.setEnabled(false); //Keep the download button disabled until the DB is uploaded.
+        mDownloadButton.setEnabled(true); //Keep the download button disabled until the DB is uploaded.
         mStopButton.setEnabled(false); //Keep the stop button disabled until something is drawn on the screen.
 
         zeroValues = new float[]{0,0,0,0,0,0,0,0,0,0};
@@ -198,8 +193,8 @@ public class MainActivity extends Activity {
                     tableName = constructedTableName;
                     Log.d("Main", "Creating table " + tableName);
 
-                    db = new PatientDatabaseHelper2(getApplicationContext(), tableName);
-                    db.createTable();
+                    patientDatabaseHelper2 = new PatientDatabaseHelper2(getApplicationContext(), tableName);
+                    patientDatabaseHelper2.createTable();
                 }
 
                 //Activate the 3 graphs
@@ -253,8 +248,8 @@ public class MainActivity extends Activity {
                         if (mAccelerometerService!=null) {
                             data = mAccelerometerService.getAccelerometerData(); //Get the latest x,y,z values from accelerometer sensor
                             //Log.d("Main", "x:" + data[0] + "   y:" + data[1] + "   z:" + data[2]);
-                            if (db!=null)
-                                db.insertRow(data);
+                            if (patientDatabaseHelper2 !=null)
+                                patientDatabaseHelper2.insertRow(data);
                         }
                         //If the graph1 was restarted by clicking "Run" (after a "STOP"), do NOT generate new values for the 1st cycle so that the last values are retained on resume.
                         if (!graphRestarted) {
@@ -304,6 +299,43 @@ public class MainActivity extends Activity {
 
     Timer timer3=null;
     public void uploadClicked(View view) {
+        String pName;
+        pName = patientName.getText().toString().trim();
+        pName = pName.trim();
+
+        if (patientId.getText().toString().trim().equals("") || patientAge.getText().toString().equals("")) {
+            Toast.makeText(getApplicationContext(), "Invalid patient data. Try again!", Toast.LENGTH_SHORT).show();
+            return;
+        }else{
+            int pId = Integer.parseInt(patientId.getText().toString());
+            int pAge = Integer.parseInt(patientAge.getText().toString());
+
+            if (pId > -1 && pAge > 0 && pAge < 150 && !pName.equals("")) { //Patient data validations
+                String pSex;
+                int selectedId = sex.getCheckedRadioButtonId();
+                if (selectedId == R.id.radioMale)
+                    pSex = "male";
+                else
+                    pSex = "female";
+
+                String constructedTableName = pName + "_" + pId + "_" + pAge + "_" + pSex; //Construct table name
+
+                if (!constructedTableName.equals(tableName)) {
+                    tableName = constructedTableName;
+                    Log.d("Main", "Creating table " + tableName);
+
+                    patientDatabaseHelper2 = new PatientDatabaseHelper2(getApplicationContext(), tableName);
+                    patientDatabaseHelper2.createTable();
+                }
+
+            }else{
+                Toast.makeText(getApplicationContext(), "Invalid patient data. Try again!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+
+
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
 
@@ -311,7 +343,7 @@ public class MainActivity extends Activity {
 
         //Custom DB path
         File sdcard = Environment.getExternalStorageDirectory();
-        String dbfileString = sdcard.getAbsolutePath() + File.separator+ "Android" + File.separator+ "Data" + File.separator + "CSE535_ASSIGNMENT2" + File.separator + db.getDatabaseName();
+        String dbfileString = sdcard.getAbsolutePath() + File.separator+ "Android" + File.separator+ "Data" + File.separator + "CSE535_ASSIGNMENT2" + File.separator + patientDatabaseHelper2.getDatabaseName();
         if (!dbfileString.endsWith(".db")) {
             dbfileString += ".db" ;
         }
@@ -325,6 +357,32 @@ public class MainActivity extends Activity {
     Timer timer2=null;
     boolean timer2Success=false;
     public void downloadClicked(View view) throws InterruptedException {
+        final String tableNameCurrent;
+        String pName;
+        pName = patientName.getText().toString().trim();
+        pName = pName.trim();
+
+        if (patientId.getText().toString().trim().equals("") || patientAge.getText().toString().equals("")) {
+            Toast.makeText(getApplicationContext(), "Invalid patient data. Try again!", Toast.LENGTH_SHORT).show();
+            return;
+        }else{
+            int pId = Integer.parseInt(patientId.getText().toString());
+            int pAge = Integer.parseInt(patientAge.getText().toString());
+
+            if (pId > -1 && pAge > 0 && pAge < 150 && !pName.equals("")) { //Patient data validations
+                String pSex;
+                int selectedId = sex.getCheckedRadioButtonId();
+                if (selectedId == R.id.radioMale)
+                    pSex = "male";
+                else
+                    pSex = "female";
+
+                tableNameCurrent = pName + "_" + pId + "_" + pAge + "_" + pSex; //Construct table name
+            }else{
+                Toast.makeText(getApplicationContext(), "Invalid patient data. Try again!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
 
         //timer2 is used to check (ever 0.2 seconds) if the download has been completed.
         //This check is to ensure that timer2 is started only if it is NOT already running.
@@ -356,32 +414,61 @@ public class MainActivity extends Activity {
                             //Check if the database has been copied over from server
                             if (uff.getDownloadStatus()) {
 
-                                PatientDownloadedDatabaseHelper pddh = new PatientDownloadedDatabaseHelper(getApplicationContext(), tableName);
+                                PatientDownloadedDatabaseHelper pddh = new PatientDownloadedDatabaseHelper(getApplicationContext(), tableNameCurrent, MainActivity.this);
                                 float[][] data;
                                 data = pddh.fetchLastTenRows();
-                                for (int i = 0; i < data[0].length; i++) {
-                                    for (int j = 0; j < data[1].length; j++) {
-                                        switch (j) {
-                                            case 0:
-                                                values1[9-i] = data[i][j];
-                                                break;
-                                            case 1:
-                                                values2[9-i] = data[i][j];
-                                                break;
-                                            case 2:
-                                                values3[9-i] = data[i][j];
-                                                break;
-                                        }
+
+                                for (int i = 0; i < data.length; i++) {
+                                    for (int j = 0; j < data[0].length; j++) {
+                                        Log.d("DownloadPlotCheck", i+","+j+":"+Float.toString(data[i][j]));
                                     }
                                 }
 
-                                graph1.setValues(values1);
-                                graph2.setValues(values2);
-                                graph3.setValues(values3);
-                                graph1.invalidate();
-                                graph2.invalidate();
-                                graph3.invalidate();
-                                Log.d("Download", "Graphs redrawn based on downloaded database.");
+
+                                        if (data == null){
+                                    Log.d("PatientDownload","Data NULL");
+                                    graph1.setValues (zeroValues); graph2.setValues (zeroValues); graph3.setValues (zeroValues);//Clear graphs, i.e., plot 0-values on graphs
+                                    graph1.invalidate(); graph2.invalidate(); graph3.invalidate(); //Force re-draw of Graph View
+                                    graphVisible = false;
+                                }else {
+                                    for (int i = 0; i < data.length; i++) {
+                                        for (int j = 0; j < data[0].length; j++) {
+                                            switch (j) {
+                                                case 0:
+                                                    values1[9 - i] = data[i][j];
+                                                    break;
+                                                case 1:
+                                                    values2[9 - i] = data[i][j];
+                                                    break;
+                                                case 2:
+                                                    values3[9 - i] = data[i][j];
+                                                    break;
+                                            }
+                                        }
+                                    }
+                                    graph1.setValues(values1);
+                                    graph2.setValues(values2);
+                                    graph3.setValues(values3);
+                                    graph1.invalidate();
+                                    graph2.invalidate();
+                                    graph3.invalidate();
+                                    Log.d("DownloadPlot", "Graphs redrawn based on downloaded database.");
+                                    String s ="x = ";
+                                    for (float f:values1)
+                                        s+=f+",";
+                                    Log.d("DownloadPlot", s);
+
+                                    s ="y = ";
+                                    for (float f:values2)
+                                        s+=f+",";
+                                    Log.d("DownloadPlot", s);
+
+                                    s ="z = ";
+                                    for (float f:values3)
+                                        s+=f+",";
+                                    Log.d("DownloadPlot", s);
+                                    
+                                }
 
                                 uff.setDownloadStatus(false); //To ensure that the graph is not refreshed multiple times.
                                 mDownloadButton.setEnabled(true); //Re-enable the download button
